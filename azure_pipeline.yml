@@ -1,0 +1,30 @@
+trigger: none
+pool: Elanthamilan
+steps:
+  - task: PowerShell@2
+    inputs:
+      targetType: "inline"
+      script: "terraform init"
+
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: "rsa_key.p8"
+    name: downloadPemFile
+
+  - task: PowerShell@2
+    inputs:
+      targetType: "inline"
+      script: |
+        $pemFilePath = "$(downloadPemFile.secureFilePath)"
+        $Env:TF_VAR_snowflake_private_key = Get-Content -Path $pemFilePath -Raw
+        $Env:TF_VAR_private_key_passphrase = '$(private_key_passphrase)'
+        terraform plan --var-file=snowflake.tfvars
+
+  - task: PowerShell@2
+    inputs:
+      targetType: "inline"
+      script: |
+        $pemFilePath = "$(downloadPemFile.secureFilePath)"
+        $Env:TF_VAR_snowflake_private_key = Get-Content -Path $pemFilePath -Raw
+        $Env:TF_VAR_private_key_passphrase = '$(private_key_passphrase)'
+        terraform apply --var-file=snowflake.tfvars --auto-approve
