@@ -5,6 +5,12 @@ terraform {
       version = "0.76"
     }
   }
+  backend "azurerm" {
+      resource_group_name  = "tfstate"
+      storage_account_name = "tfstateazuretfkavi"
+      container_name       = "tfstate"
+      key                  = "terraform.tfstate"
+  }
 }
 
 provider "snowflake" {
